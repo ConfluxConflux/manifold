@@ -269,9 +269,15 @@ select
   using (true);
 
 create index if not exists user_notifications_data_gin on user_notifications using GIN (data);
+create index if not exists user_notifications_created_time on user_notifications using (
+  user_id,
+  (to_jsonb(data)->'createdTime') desc);
+create index if not exists user_notifications_unseen_created_time on user_notifications using (
+  user_id,
+  (to_jsonb(data)->'isSeen'),
+  (to_jsonb(data)->'createdTime') desc);
 
-alter table user_notifications
-cluster on user_notifications_pkey;
+alter table user_notifications cluster on user_notifications_created_time;
 
 create table if not exists
   contracts (
