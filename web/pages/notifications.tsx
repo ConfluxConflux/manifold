@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Notification, ReactionNotificationTypes } from 'common/notification'
-import { PrivateUser } from 'common/user'
+import { PrivateUser, User } from 'common/user'
 import { sortBy } from 'lodash'
 import { useRouter } from 'next/router'
 import React, { Fragment, ReactNode, useEffect, useMemo, useState } from 'react'
@@ -31,24 +31,30 @@ import {
   useGroupedNonBalanceChangeNotifications,
 } from 'web/hooks/use-notifications'
 import { useIsPageVisible } from 'web/hooks/use-page-visible'
-import { useRedirectIfSignedOut } from 'web/hooks/use-redirect-if-signed-out'
-import { useIsAuthorized, usePrivateUser } from 'web/hooks/use-user'
+import { useIsAuthorized } from 'web/hooks/use-user'
 import { XIcon } from '@heroicons/react/outline'
-import { updatePrivateUser } from 'web/lib/firebase/users'
+import { updatePrivateUser, getUserAndPrivateUser } from 'web/lib/firebase/users'
 import { getNativePlatform } from 'web/lib/native/is-native'
 import { AppBadgesOrGetAppButton } from 'web/components/buttons/app-badges-or-get-app-button'
 import { LoadingIndicator } from 'web/components/widgets/loading-indicator'
+import { redirectIfLoggedOut } from 'web/lib/firebase/server-auth'
 
-export default function Notifications() {
-  const privateUser = usePrivateUser()
+export const getServerSideProps = redirectIfLoggedOut('/', async (_, creds) => {
+  return { props: { auth: await getUserAndPrivateUser(creds.uid) } }
+})
+
+export default function Notifications(props: {
+  auth: { user: User; privateUser: PrivateUser }
+}) {
+  const { privateUser } = props.auth
   const router = useRouter()
   const [navigateToSection, setNavigateToSection] = useState<string>()
   const { isNative } = getNativePlatform()
-  useRedirectIfSignedOut()
+
   const { groupedNotifications, mostRecentNotification } =
-    useGroupedNonBalanceChangeNotifications(privateUser)
+    useGroupedNonBalanceChangeNotifications(privateUser.id)
   const balanceChangeGroupedNotifications =
-    useGroupedBalanceChangeNotifications(privateUser)
+    useGroupedBalanceChangeNotifications(privateUser.id)
 
   useEffect(() => {
     if (!router.isReady) return
