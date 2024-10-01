@@ -85,6 +85,7 @@ export const PROD_CONFIG: EnvConfig = {
     'vuI5upWB8yU00rP7yxj95J2zd952', // Manifold Politics
     '8lZo8X5lewh4hnCoreI7iSc0GxK2', // Manifold AI
     'mwaVAaKkabODsH8g5VrtbshsXz03', // Ian's alt
+    'HTbxWFlzWGeHUTiwZvvF0qm8W433', // Conflux
   ],
   visibility: 'PUBLIC',
 
